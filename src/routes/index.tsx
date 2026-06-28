@@ -1,29 +1,36 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Atlas — A premium AI assistant" },
+      { name: "description", content: "Chat with Atlas, a fast, accurate AI assistant with markdown, code highlighting, and conversation history." },
+      { property: "og:title", content: "Atlas — A premium AI assistant" },
+      { property: "og:description", content: "Chat with Atlas, a fast, accurate AI assistant." },
     ],
   }),
-  component: Index,
+  component: IndexPage,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function IndexPage() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      navigate({ to: data.session ? "/c" : "/auth", replace: true });
+    });
+  }, [navigate]);
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen grid place-items-center bg-background">
+      <div className="flex items-center gap-3 text-muted-foreground">
+        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-brand to-primary grid place-items-center animate-pulse">
+          <Sparkles className="h-5 w-5 text-brand-foreground" />
+        </div>
+        <span className="text-sm">Loading Atlas…</span>
+      </div>
     </div>
   );
 }
