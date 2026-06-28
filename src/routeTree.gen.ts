@@ -9,38 +9,113 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthenticatedCRouteImport } from './routes/_authenticated/c'
+import { Route as AuthenticatedCIndexRouteImport } from './routes/_authenticated/c.index'
+import { Route as AuthenticatedCThreadIdRouteImport } from './routes/_authenticated/c.$threadId'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedCRoute = AuthenticatedCRouteImport.update({
+  id: '/c',
+  path: '/c',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCIndexRoute = AuthenticatedCIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedCRoute,
+} as any)
+const AuthenticatedCThreadIdRoute = AuthenticatedCThreadIdRouteImport.update({
+  id: '/$threadId',
+  path: '/$threadId',
+  getParentRoute: () => AuthenticatedCRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/c': typeof AuthenticatedCRouteWithChildren
+  '/api/chat': typeof ApiChatRoute
+  '/c/$threadId': typeof AuthenticatedCThreadIdRoute
+  '/c/': typeof AuthenticatedCIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/api/chat': typeof ApiChatRoute
+  '/c/$threadId': typeof AuthenticatedCThreadIdRoute
+  '/c': typeof AuthenticatedCIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/c': typeof AuthenticatedCRouteWithChildren
+  '/api/chat': typeof ApiChatRoute
+  '/_authenticated/c/$threadId': typeof AuthenticatedCThreadIdRoute
+  '/_authenticated/c/': typeof AuthenticatedCIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/auth' | '/c' | '/api/chat' | '/c/$threadId' | '/c/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/auth' | '/api/chat' | '/c/$threadId' | '/c'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/c'
+    | '/api/chat'
+    | '/_authenticated/c/$threadId'
+    | '/_authenticated/c/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +123,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/c': {
+      id: '/_authenticated/c'
+      path: '/c'
+      fullPath: '/c'
+      preLoaderRoute: typeof AuthenticatedCRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/c/': {
+      id: '/_authenticated/c/'
+      path: '/'
+      fullPath: '/c/'
+      preLoaderRoute: typeof AuthenticatedCIndexRouteImport
+      parentRoute: typeof AuthenticatedCRoute
+    }
+    '/_authenticated/c/$threadId': {
+      id: '/_authenticated/c/$threadId'
+      path: '/$threadId'
+      fullPath: '/c/$threadId'
+      preLoaderRoute: typeof AuthenticatedCThreadIdRouteImport
+      parentRoute: typeof AuthenticatedCRoute
+    }
   }
 }
 
+interface AuthenticatedCRouteChildren {
+  AuthenticatedCThreadIdRoute: typeof AuthenticatedCThreadIdRoute
+  AuthenticatedCIndexRoute: typeof AuthenticatedCIndexRoute
+}
+
+const AuthenticatedCRouteChildren: AuthenticatedCRouteChildren = {
+  AuthenticatedCThreadIdRoute: AuthenticatedCThreadIdRoute,
+  AuthenticatedCIndexRoute: AuthenticatedCIndexRoute,
+}
+
+const AuthenticatedCRouteWithChildren = AuthenticatedCRoute._addFileChildren(
+  AuthenticatedCRouteChildren,
+)
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCRoute: typeof AuthenticatedCRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCRoute: AuthenticatedCRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
