@@ -51,10 +51,10 @@ export const Route = createFileRoute("/api/chat")({
             return new Response("Bad request: messages[] and threadId required", { status: 400 });
           }
 
-          const key = process.env.LOVABLE_API_KEY;
+          const key = process.env.OPENAI_API_KEY;
           if (!key) {
-            console.error("[api/chat] Missing LOVABLE_API_KEY");
-            return new Response("AI is not configured (missing API key)", { status: 500 });
+            console.error("[api/chat] Missing OPENAI_API_KEY");
+            return new Response("AI is not configured (missing OPENAI_API_KEY)", { status: 500 });
           }
 
           const supabase = getUserClient(token);
